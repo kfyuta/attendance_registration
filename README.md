@@ -1,0 +1,2 @@
+# attendance_registration
+LINEとGASを使った勤怠登録スクリプト
