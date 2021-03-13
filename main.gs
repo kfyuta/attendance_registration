@@ -36,6 +36,15 @@ function filterMessage(msg, dateRange, today) {
         break;
       }
     }
+  } else if (msg.startsWith("休日")) {
+    for (let i = 0; i < dateRangeValues.length; i++) {
+      if (today === dateRangeValues[i][0]) {
+        dateRange.getCell(i + 1, START_WORK).setValue("0:00");
+        dateRange.getCell(i + 1, END_WORK).setValue("0:00");
+        dateRange.getCell(i + 1, BREAK).setValue("0:00");
+        break;
+      }
+    }
   } else {
     return false;
   }
