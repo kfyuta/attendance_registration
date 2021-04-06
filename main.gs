@@ -85,3 +85,26 @@ function reply(result, e) {
   // JSON形式でAPIにポスト
   UrlFetchApp.fetch("https://api.line.me/v2/bot/message/reply", replyData);
 }
+
+/**
+ * 
+ */
+function pushMessage() {
+  const body = {
+    messages: [
+        {
+          "type": "text",
+          "text": "出勤時間の入力がまだです",
+        }
+      ],
+  };
+  const pushMsg = {
+    "method": "post",
+    "headers": {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + CHANNEL_ACCESS_TOKEN,
+    },
+    "payload": JSON.stringify(body)
+  }
+  UrlFetchApp.fetch("https://api.line.me/v2/bot/message/broadcast", pushMsg);
+}
