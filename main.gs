@@ -51,7 +51,7 @@ function filterMessage(msg, dateRange, today) {
   return true;
 }
 
-/*
+/**
  * 記録内容を返信する
  */
 function reply(result, e) {
@@ -87,17 +87,12 @@ function reply(result, e) {
 }
 
 /**
- * 
+ * Send push message from line platform.
+ * @param messages: array which has object.
+ * @return void
  */
-function pushMessage() {
-  const body = {
-    messages: [
-        {
-          "type": "text",
-          "text": "出勤時間の入力がまだです",
-        }
-      ],
-  };
+function pushMessage(messages) {
+  const body = {messages};
   const pushMsg = {
     "method": "post",
     "headers": {
@@ -107,4 +102,55 @@ function pushMessage() {
     "payload": JSON.stringify(body)
   }
   UrlFetchApp.fetch("https://api.line.me/v2/bot/message/broadcast", pushMsg);
+}
+
+/**
+ * 登録がまだのとき勤怠登録をリマインドする。
+ * 実行はトリガーが行う。
+ */
+function remind() {
+  const now = new Date();
+  const checkInput = checkInputTime(now);
+  if (now.getHours() === 10 && !checkInput.start) {
+    const messages = [
+      {
+        type: 'text',
+        text: '出勤時間の登録がまだです。' 
+      }
+    ];
+    pushMessage(messages);
+  } else if (now.getHours() === 14 && !checkInput.break) {
+    const messages = [
+      {
+        type: 'text',
+        text: '休憩時間の登録がまだです。' 
+      }
+    ];
+    pushMessage(messages);
+  }　else if (now.getHours() === 21 && !checkInput.end) {
+    const messages = [
+      {
+        type: 'text',
+        text: '休憩時間の登録がまだです。' 
+      }
+    ];
+    pushMessage(messages);    
+  } else {
+    return;
+  }
+}
+
+/**
+ * 勤務開始、終了、休憩の入力状況を返却する
+ * @param Date Object
+ * @return object {start: boolean, break: boolean, end: boolean}
+ */
+function checkInputTime(now) {
+  const currentMonthSheet = workSchedule.getSheets().splice(-1)[0];
+  const dataRange = currentMonthSheet.getRange(10, 5, 31, 5).getValues();
+  const checkResult = {};
+  checkResult.start = dataRange[now.getDate() - 1][0] !== '';
+  checkResult.break = dataRange[now.getDate() - 1][4] !== '';
+  checkResult.end = dataRange[now.getDate() - 1][1] !== '';
+  return checkResult;
 }
