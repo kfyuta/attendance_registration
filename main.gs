@@ -52,7 +52,51 @@ function filterMessage(msg, dateRange, today) {
 }
 
 /**
+ * @param {string} LINEから送られたメッセージ
+ * @param {array} 走査する矩系領域
+ * @param {number} 日
+ * @return {boolean} 登録を行えばtrue, 行わなかった場合はfalse
+ */
+function filterMessageUseQuery(msg, dateRange, today) {
+  const querySheet = workSchedule.getSheetByName("QUERY");
+  const currentSheet = workSchedule.getSheets().splice(-1)[0];
+  const query = `=query('${currentSheet.getName()}'!B10:J40, "select * where B = ${today}")`;
+  querySheet.getRange('A2').setFormula(query);
+  const result = querySheet.getDataRange().getValues();
+
+  // resultはヘッダ部も含むため0にはならない
+  if (result.length < 2) {
+    return false;
+  }
+
+  const command = msg.substring(0, 2);
+  const data = msg.substring(2);
+  switch (command) {
+    case "出勤":
+      dateRange.getCell(today - 1, START_WORK).setValue(data);
+      break;
+    case "退勤":
+      dateRange.getCell(today - 1, END_WORK).setValue(data);
+      break;
+    case "休憩":
+      dateRange.getCell(today - 1, BREAK).setValue(data);
+      break;
+    case "休日":
+      dateRange.getCell(today - 1, START_WORK).setValue("0:00");
+      dateRange.getCell(today - 1, END_WORK).setValue("0:00");
+      dateRange.getCell(today - 1, BREAK).setValue("0:00");
+      break;
+    default:
+      return false;
+  }
+  return true;
+}
+
+/**
  * 記録内容を返信する
+ * @param {boolean} reply実行判定用
+ * @param {object} LINEから受信したイベントオブジェクト
+ * @return {void}
  */
 function reply(result, e) {
   const message = {};
@@ -142,8 +186,8 @@ function remind() {
 
 /**
  * 勤務開始、終了、休憩の入力状況を返却する
- * @param {Date}
- * @return object {start: boolean, break: boolean, end: boolean}
+ * @param {object} Date型
+ * @return {object} start: boolean, break: boolean, end: boolean
  */
 function checkInputTime(now) {
   const currentMonthSheet = workSchedule.getSheets().splice(-1)[0];
