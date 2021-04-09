@@ -131,7 +131,7 @@ function remind() {
     const messages = [
       {
         type: 'text',
-        text: '休憩時間の登録がまだです。' 
+        text: '退勤時間の登録がまだです。' 
       }
     ];
     pushMessage(messages);    
@@ -142,7 +142,7 @@ function remind() {
 
 /**
  * 勤務開始、終了、休憩の入力状況を返却する
- * @param Date Object
+ * @param {Date}
  * @return object {start: boolean, break: boolean, end: boolean}
  */
 function checkInputTime(now) {
