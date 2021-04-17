@@ -1,101 +1,12 @@
-// 勤務表の列番
-const [START_WORK, END_WORK, BREAK] = [4, 5, 8];
-const workSchedule = SpreadsheetApp.openById(SPREADSHEET_ID);
-
 function doPost(e) {
-  const currentSheet = workSchedule.getSheets().splice(-1)[0];
-  const dateRange = currentSheet.getRange(10, 2, 31, 8);
+  // LINEから受信したJSONデータをパースする
   const data = JSON.parse(e.postData.contents);
+  // dataからメッセージ部分のみを取り出す
   const msg = data.events[0].message.text;
-  const today = new Date().getDate();
-  const result = filterMessage(msg, dateRange, today);
+  // メッセージをパースし命令に応じた処理を実行する
+  const result = parseCSV(msg);
+  // 結果に応じてメッセージを送信する
   reply(result, data.events[0]);
-}
-
-/**
- * メッセージを解析し、シートに時間を登録する
- * @param {string} 受信したメッセージ
- * @param {object} 日付が入力されている矩形領域
- * @param {number} 今日の日付
- * @return {boolean} 実行結果。シートに登録した場合true、それ以外はfalse.
- */
-function filterMessage(msg, dateRange, today) {
-  const dateRangeValues = dateRange.getValues();
-  if (msg.startsWith("出勤")) {
-    for (let i = 0; i < dateRangeValues.length; i++) {
-      if (today === dateRangeValues[i][0]) {
-        dateRange.getCell(i + 1, START_WORK).setValue(msg.substring(2));
-        break;
-      }
-    }
-  } else if (msg.startsWith("退勤")) {
-    for (let i = 0; i < dateRangeValues.length; i++) {
-      if (today === dateRangeValues[i][0]) {
-        dateRange.getCell(i + 1, END_WORK).setValue(msg.substring(2));
-        break;
-      }
-    }
-  } else if (msg.startsWith("休憩")) {
-    for (let i = 0; i < dateRangeValues.length; i++) {
-      if (today === dateRangeValues[i][0]) {
-        dateRange.getCell(i + 1, BREAK).setValue(msg.substring(2));
-        break;
-      }
-    }
-  } else if (msg.startsWith("休日")) {
-    for (let i = 0; i < dateRangeValues.length; i++) {
-      if (today === dateRangeValues[i][0]) {
-        dateRange.getCell(i + 1, START_WORK).setValue("0:00");
-        dateRange.getCell(i + 1, END_WORK).setValue("0:00");
-        dateRange.getCell(i + 1, BREAK).setValue("0:00");
-        break;
-      }
-    }
-  } else {
-    return false;
-  }
-  return true;
-}
-
-/**
- * @param {string} LINEから送られたメッセージ
- * @param {array} 走査する矩系領域
- * @param {number} 日
- * @return {boolean} 登録を行えばtrue, 行わなかった場合はfalse
- */
-function filterMessageUseQuery(msg, dateRange, today) {
-  const querySheet = workSchedule.getSheetByName("QUERY");
-  const currentSheet = workSchedule.getSheets().splice(-1)[0];
-  const query = `=query('${currentSheet.getName()}'!B10:J40, "select * where B = ${today}")`;
-  querySheet.getRange('A2').setFormula(query);
-  const result = querySheet.getDataRange().getValues();
-
-  // resultはヘッダ部も含むため0にはならない
-  if (result.length < 2) {
-    return false;
-  }
-
-  const command = msg.substring(0, 2);
-  const data = msg.substring(2);
-  switch (command) {
-    case "出勤":
-      dateRange.getCell(today - 1, START_WORK).setValue(data);
-      break;
-    case "退勤":
-      dateRange.getCell(today - 1, END_WORK).setValue(data);
-      break;
-    case "休憩":
-      dateRange.getCell(today - 1, BREAK).setValue(data);
-      break;
-    case "休日":
-      dateRange.getCell(today - 1, START_WORK).setValue("0:00");
-      dateRange.getCell(today - 1, END_WORK).setValue("0:00");
-      dateRange.getCell(today - 1, BREAK).setValue("0:00");
-      break;
-    default:
-      return false;
-  }
-  return true;
 }
 
 /**
@@ -108,10 +19,11 @@ function reply(result, e) {
   const message = {};
   if (result) {
     message.replyToken = e.replyToken;
+    const [cmd, data, ...opts] = e.message.text.split(',');
     message.messages = [
         {
           "type": "text",
-          "text": `${e.message.text.substring(0, 2)} ${e.message.text.substring(2)} を登録しました`,
+          "text": `${cmd} ${data} を登録しました`,
         } 
     ]
   } else {
@@ -203,4 +115,25 @@ function checkInputTime(now) {
   checkResult.break = dataRange[now.getDate() - 1][4] !== '';
   checkResult.end = dataRange[now.getDate() - 1][1] !== '';
   return checkResult;
+}
+
+/**
+ * 受信したメッセージを解析し、commandを実行する
+ * @param {string} csvテキスト
+ */
+function parseCSV(csv) {
+  const [cmd, data, ...options] = csv.split(',');
+  // commandsに存在しないコマンド名の場合、falseを返却して処理終了
+  if (!commands[cmd]) {
+    Logger.log("[FAILED]: Invalid Command");
+    return false;
+  } else {
+    commands[cmd](data);
+    return true;
+  }
+}
+
+function test() {
+  console.log(parseCSV("休日0:00"));
+  console.log(parseCSV("休日"));
 }
