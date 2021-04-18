@@ -1,3 +1,8 @@
+/**
+ * Lineに投稿されたときに呼ばれる関数
+ * @param {object} 
+ * @return {void}
+ */
 function doPost(e) {
   Logger.log("メッセージ受信: 処理開始")
   // LINEから受信したJSONデータをパースする
