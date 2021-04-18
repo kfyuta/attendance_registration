@@ -126,7 +126,7 @@ function checkInputTime(now) {
  */
 function parseCSV(csv) {
   let [cmd, data, ...options] = csv.split(',');
-  // スペースを除去
+  // 命令部のスペースを除去
   cmd = cmd.trim();
   // データフォーマットが異なる場合
   if (data && !isValidData(data)) {
@@ -137,7 +137,9 @@ function parseCSV(csv) {
     Logger.log("[FAILED]: Invalid Command");
     return false;
   } else {
+    Logger.log("命令を開始");
     commands[cmd](data);
+    Logger.log("命令を終了");
     return true;
   }
 }
@@ -157,6 +159,11 @@ function isValidData(data) {
   // データに「半角数字と:」以外の文字が含まれていたとき
   if (data.match(/[^0-9:]/)) {
     Logger.log("Invalid Data. Data includes invalid character.");
+    return false;
+  }
+  // hh:mm形式のフォーマットではないとき
+  if (!data.match(/\d{1,2}:\d{1,2}/)) {
+    Logger.log("Invalid Data. Format is invalid.")
     return false;
   }
   return true;
