@@ -25,7 +25,7 @@ function reply(result, e) {
     message.messages = [
         {
           "type": "text",
-          "text": `${cmd} ${data} を登録しました`,
+          "text": `${cmd} ${data ? data : ""} を登録しました`,
         } 
     ]
   } else {
