@@ -1,4 +1,5 @@
 function doPost(e) {
+  Logger.log("メッセージ受信: 処理開始")
   // LINEから受信したJSONデータをパースする
   const data = JSON.parse(e.postData.contents);
   // dataからメッセージ部分のみを取り出す
@@ -7,6 +8,7 @@ function doPost(e) {
   const result = parseCSV(msg);
   // 結果に応じてメッセージを送信する
   reply(result, data.events[0]);
+  Logger.log("メッセージ送信： 処理終了");
 }
 
 /**
@@ -120,9 +122,16 @@ function checkInputTime(now) {
 /**
  * 受信したメッセージを解析し、commandを実行する
  * @param {string} csvテキスト
+ * @return {boolean} 実行結果 
  */
 function parseCSV(csv) {
-  const [cmd, data, ...options] = csv.split(',');
+  let [cmd, data, ...options] = csv.split(',');
+  // スペースを除去
+  cmd = cmd.trim();
+  // データフォーマットが異なる場合
+  if (data && !isValidData(data)) {
+    return false;
+  }
   // commandsに存在しないコマンド名の場合、falseを返却して処理終了
   if (!commands[cmd]) {
     Logger.log("[FAILED]: Invalid Command");
@@ -133,7 +142,22 @@ function parseCSV(csv) {
   }
 }
 
-function test() {
-  console.log(parseCSV("休日0:00"));
-  console.log(parseCSV("休日"));
+
+/**
+ * 引数のフォーマットが正しいかチェックする
+ * @param {string}
+ * @return {boolean}
+ */
+function isValidData(data) {
+  // データが5文字以上のとき
+  if (data.length > 5) {
+    Logger.log("Invalid Data. Length is over 5.");
+    return false;
+  }
+  // データに「半角数字と:」以外の文字が含まれていたとき
+  if (data.match(/[^0-9:]/)) {
+    Logger.log("Invalid Data. Data includes invalid character.");
+    return false;
+  }
+  return true;
 }
