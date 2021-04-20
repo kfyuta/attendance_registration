@@ -12,36 +12,56 @@ function doPost(e) {
   // メッセージをパースし命令に応じた処理を実行する
   const result = parseCSV(msg);
   // 結果に応じてメッセージを送信する
-  reply(result, data.events[0]);
+  if (result) {
+    replySuccessMsg(data.events[0]) 
+  } else {
+    replyFailedMsg(data.events[0]);
+  }
   Logger.log("メッセージ送信： 処理終了");
 }
 
 /**
- * 記録内容を返信する
- * @param {boolean} reply実行判定用
- * @param {object} LINEから受信したイベントオブジェクト
- * @return {void}
+ * 処理成功時のメッセージを送信する
+ * @param {object} Lineから受信したイベントオブジェクト
  */
-function reply(result, e) {
-  const message = {};
-  if (result) {
-    message.replyToken = e.replyToken;
-    const [cmd, data, ...opts] = e.message.text.split(',');
-    message.messages = [
-        {
-          "type": "text",
-          "text": `${cmd} ${data ? data : ""} を登録しました`,
-        } 
+function replySuccessMsg(e) {
+  const [cmd, data, ...opts] = e.message.text.split(',');
+  const message = {
+    replyToken: e.replyToken,
+    messages: [
+      {
+        "type": "text",
+        "text": `${cmd} ${data ? data : ""} を登録しました`,
+      } 
     ]
-  } else {
-    message.replyToken = e.replyToken;
-    message.messages = [
-        {
-          "type": "text",
-          "text": "無効な文字列です",
-        } 
+  };
+  // 送信のための諸準備
+  const replyData = {
+    "method": "post",
+    "headers": {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + CHANNEL_ACCESS_TOKEN,
+    },
+    "payload": JSON.stringify(message)
+  };
+  // JSON形式でAPIにポスト
+  UrlFetchApp.fetch("https://api.line.me/v2/bot/message/reply", replyData);
+}
+
+/**
+ * 処理失敗時のメッセージを送信する
+ * @param {object} Lineから受信したイベントオブジェクト
+ */
+function replyFailedMsg(e) {
+  const message = {
+    replyToken: e.replyToken,
+    messages: [
+      {
+        "type": "text",
+        "text": `無効な文字列です`,
+      } 
     ]
-  }
+  };
   // 送信のための諸準備
   const replyData = {
     "method": "post",
