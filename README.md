@@ -14,5 +14,5 @@ You need to read files in the following order.
 1. git clone git@github.com:kfyuta/attendance_registration.git
 2. Create Line Messaging API, and get CHANNEL ACCESS TOKEN.
 3. Create property.gs, you can decide this file name. File name isn't important.
-4. Declear "const CHANNEL_ACCESS_TOKEN = <You get the CHANNEL ACCESS TOKEN>".
-5. Declear "const SPREADSHEET_ID = <Your spreadsheet id which you will write your attendance info.>"
+4. Declear "const CHANNEL_ACCESS_TOKEN = {You get the CHANNEL ACCESS TOKEN}".
+5. Declear "const SPREADSHEET_ID = {Your spreadsheet id which you will write your attendance info.}"
