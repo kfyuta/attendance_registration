@@ -1,5 +1,5 @@
 // 勤務表の列番
-const [START_WORK, END_WORK, BREAK] = [4, 5, 8];
+const [DAYOFF, START_WORK, END_WORK, BREAK] = [3, 4, 5, 8];
 
 // 作業工数表のスプレッドシート
 const workSchedule = SpreadsheetApp.openById(SPREADSHEET_ID);
@@ -23,7 +23,7 @@ const commands = {
     Logger.log("休憩登録終了");
   },
   "退勤": data => {
-    Logger.log("退勤登録開始");
+    Logger.log("退勤登録開始")
     dateRange.getCell(today, END_WORK).setValue(data);
     Logger.log("退勤登録終了");
   },
@@ -33,5 +33,23 @@ const commands = {
     dateRange.getCell(today, BREAK).setValue("0:00");
     dateRange.getCell(today, END_WORK).setValue("0:00");
     Logger.log("休日登録終了");
+  },
+  "有給": () => {
+    dateRange.getCell(today, DAYOFF).setValue("○");
+    dateRange.getCell(today, START_WORK).setValue("0:00");
+    dateRange.getCell(today, BREAK).setValue("0:00");
+    dateRange.getCell(today, END_WORK).setValue("0:00");
+  },
+  "振休": () => {
+    dateRange.getCell(today, DAYOFF).setValue("◎");
+    dateRange.getCell(today, START_WORK).setValue("0:00");
+    dateRange.getCell(today, BREAK).setValue("0:00");
+    dateRange.getCell(today, END_WORK).setValue("0:00");
+  },
+  "特別休暇": () => {
+    dateRange.getCell(today, DAYOFF).setValue("☆");
+    dateRange.getCell(today, START_WORK).setValue("0:00");
+    dateRange.getCell(today, BREAK).setValue("0:00");
+    dateRange.getCell(today, END_WORK).setValue("0:00");
   },
 }
