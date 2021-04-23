@@ -24,3 +24,9 @@ function testParseCSV() {
   console.log("No23", parseCSV("出勤,12345") ? "FAILED" : "SUCCESS");
   console.log("No24", parseCSV("出勤, 9:00") ? "FAILED" : "SUCCESS");
 };
+
+function testAddedCommands() {
+  commands["有給"]();
+  commands["振休"]();
+  commands["特別休暇"]();
+}
