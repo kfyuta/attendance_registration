@@ -30,3 +30,9 @@ function testAddedCommands() {
   commands["振休"]();
   commands["特別休暇"]();
 }
+
+function testIsInputTimeValid() {
+  console.log("登録時間 > 現在時刻 is False.", isInputTimeValid("09:00", "08:30"));
+  console.log("登録時間 = 現在時刻 is True.", isInputTimeValid("09:00", "09:00"));
+  console.log("登録時間 < 現在時刻 is True.", isInputTimeValid("09:00", "09:30"));
+}

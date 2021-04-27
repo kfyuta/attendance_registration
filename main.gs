@@ -193,3 +193,22 @@ function isValidData(data) {
   }
   return true;
 }
+
+/**
+ * 登録したい時間と現在時刻の前後関係を調べる。現在時刻よりも前ならtrue,それ以外はfalse。
+ * @param {object} 登録したい時間 Date Object
+ * @param {object} 現在時刻 Date Object
+ * @retrun {boolean}
+ */
+function isInputTimeValid(inputTime, now) {
+  // 引数がDateオブジェクトでない場合
+  if (!inputTime instanceof Date || !now instanceof Date) {
+    return false;
+  }
+  if (inputTime > now) {
+    return false;
+  }
+  if (inputTime <= now) {
+    return true;
+  }
+}
