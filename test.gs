@@ -26,7 +26,5 @@ function testParseCSV() {
 };
 
 function testAddedCommands() {
-  commands["有給"]();
-  commands["振休"]();
-  commands["特別休暇"]();
+  console.log(commands["一覧"]());
 }

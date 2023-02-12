@@ -52,4 +52,31 @@ const commands = {
     dateRange.getCell(today, BREAK).setValue("0:00");
     dateRange.getCell(today, END_WORK).setValue("0:00");
   },
+  "祝日": () => {
+    dateRange.getCell(today, DAYOFF).setValue("★");
+    dateRange.getCell(today, START_WORK).setValue("0:00");
+    dateRange.getCell(today, BREAK).setValue("0:00");
+    dateRange.getCell(today, END_WORK).setValue("0:00");
+  },
+  "一覧": () => {
+    let str = [];
+    const values = dateRange.getValues();
+    for (let value of values) {
+      str.push(value[0].toString().padStart(2, "0") + "日 ");
+      if (typeof(value[3]) === "string") {
+        str.push("未入力 ~");
+      } else {
+        str.push(value[3].getHours().toString().padStart(2, "0") + 
+        ":" +value[3].getMinutes().toString().padStart(2,"0"), " ~ ");
+      }
+      if (typeof(value[4]) === "string") {
+        str.push(" 未入力");
+      } else {
+        str.push(value[4].getHours().toString().padStart(2, "0") + 
+        ":" +value[4].getMinutes().toString().padStart(2,"0"));
+      }
+      str.push("\n");
+    }
+    return str.join("");
+  }
 }

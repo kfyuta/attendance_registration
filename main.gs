@@ -12,8 +12,8 @@ function doPost(e) {
   // メッセージをパースし命令に応じた処理を実行する
   const result = parseCSV(msg);
   // 結果に応じてメッセージを送信する
-  if (result) {
-    replySuccessMsg(data.events[0]) 
+  if (result.result) {
+    replySuccessMsg(data.events[0],result) 
   } else {
     replyFailedMsg(data.events[0]);
   }
@@ -24,14 +24,14 @@ function doPost(e) {
  * 処理成功時のメッセージを送信する
  * @param {object} Lineから受信したイベントオブジェクト
  */
-function replySuccessMsg(e) {
+function replySuccessMsg(e, result) {
   const [cmd, data, ...opts] = e.message.text.split(',');
   const message = {
     replyToken: e.replyToken,
     messages: [
       {
         "type": "text",
-        "text": `${cmd} ${data ? data : ""} を登録しました`,
+        "text": result.data === undefined? `${cmd} ${data ? data : ""} を登録しました` : result.data,
       } 
     ]
   };
@@ -147,7 +147,7 @@ function checkInputTime(now) {
 /**
  * 受信したメッセージを解析し、commandを実行する
  * @param {string} csvテキスト
- * @return {boolean} 実行結果 
+ * @return {object} 実行結果 
  */
 function parseCSV(csv) {
   let [cmd, data, ...options] = csv.split(',');
@@ -155,17 +155,18 @@ function parseCSV(csv) {
   cmd = cmd.trim();
   // データフォーマットが異なる場合
   if (data && !isValidData(data)) {
-    return false;
+    return {result: false};
   }
   // commandsに存在しないコマンド名の場合、falseを返却して処理終了
   if (!commands[cmd]) {
     Logger.log("[FAILED]: Invalid Command");
-    return false;
+    return {result: false};
   } else {
-    Logger.log("命令を開始");
-    commands[cmd](data);
-    Logger.log("命令を終了");
-    return true;
+    let res = commands[cmd](data);
+    return {
+      result: true,
+      data: res,
+    };
   }
 }
 
