@@ -5,7 +5,7 @@ const [DAYOFF, START_WORK, END_WORK, BREAK] = [3, 4, 5, 8];
 const workSchedule = SpreadsheetApp.openById(SPREADSHEET_ID);
 
 // 最新(当月)のシートを取得
-const currentSheet = workSchedule.getSheets().splice(-1)[0];
+const currentSheet = workSchedule.getSheets()[1];
 // 入力領域を取得
 const dateRange = currentSheet.getRange(10, 2, 31, 8);
 const today = new Date().getDate();

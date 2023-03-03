@@ -135,7 +135,7 @@ function remind() {
  * @return {object} start: boolean, break: boolean, end: boolean
  */
 function checkInputTime(now) {
-  const currentMonthSheet = workSchedule.getSheets().splice(-1)[0];
+  const currentMonthSheet = workSchedule.getSheets()[1];
   const dataRange = currentMonthSheet.getRange(10, 5, 31, 5).getValues();
   const checkResult = {};
   checkResult.start = dataRange[now.getDate() - 1][0] !== '';
